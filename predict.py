@@ -44,8 +44,8 @@ print("John Bergs plan 3", predict(2331, 36, 0, 1, 0, 0, 59.33660760344284, 18.0
 print("Pontonjärgatan 21", predict(1386, 37, 0, 2, 1, 0, 59.3287096941292, 18.03357154798916))
 print("Kungsholmsgatan 11", predict(3355, 42, 0, 5, 0, 1, 59.330794867459694, 18.04856538283224))
 
-plt.scatter(X.living_space, y, label="test", s=2)
-plt.scatter(X_test.living_space, y_pred, color="r", s=2)
+plt.scatter(X.living_space, y, s=2)
+plt.scatter(X_test.living_space, y_pred, label="Predictions", color="r", s=2)
 
 ax = plt.gca()
 ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
@@ -55,4 +55,5 @@ ax.spines['top'].set_visible(False)
 plt.xlabel('Size (m²)')
 plt.ylabel('Price (SEK)')
 
+plt.legend()
 plt.show()
