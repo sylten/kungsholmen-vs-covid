@@ -1,6 +1,11 @@
 const fs = require('fs')
 const json2csv = require('json-2-csv').json2csv;
 
+/**
+ * I used javascript for this. I have a web development background and still feel more comfortable in JS.
+ * I probably should practice my Python but I wanted to clean up the data and get started quickly :)
+ */
+
 function getFloor(adress) {
     for (let pattern of [/,(.*) tr/, /, (.*)tr/, /,(.*)tr/, /, våning (.*)/, /, vån (.*)/,/ vån (.*)./]) {
         let tr = adress.match(pattern);
@@ -20,8 +25,8 @@ for (let i = 1; i <= 25; i++) {
         p.asked_price = p.asked_price?.replace(/\D/g,'') || '';
         p.price = p.formatted_price?.replace(/\D/g,'') || '';
         p.price_change = !p.formatted_price_change_percentage ? 0 : parseInt(p.formatted_price_change_percentage.replace(/[\+\%\s]/g,''));
-        p.is_attractive = p.price_change > 20;
-        p.is_unattractive = p.price_change < 0;
+        p.is_attractive = p.price_change > 20 ? 1 : 0;
+        p.is_unattractive = p.price_change < 0 ? 1 : 0;
         p.living_space = (p.living_space?.substr(0, p.living_space.indexOf(' ')).replace(',', '.') || '').trim();
         p.supplemental_area = p.supplemental_area?.substr(0, p.supplemental_area.indexOf(' ')).replace(',', '.') || 0;
         p.rooms = p.rooms?.substr(0, p.rooms.indexOf(' ')).replace(',', '.') || '';

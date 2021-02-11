@@ -1,8 +1,9 @@
+from read_prices import read_prices
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-apartments = pd.read_csv('./datasets/apartment-prices.csv')
+apartments = read_prices()
 
 apartments['datetime'] = pd.to_datetime(apartments['sale_date'])
 
@@ -20,6 +21,7 @@ for bounds in [(0, 25), (26, 50), (51, 150)]:
 
     first = df.iloc[0]
     last = df.iloc[len(df)-1]
+    
     print(bounds, int(first), int(last), (last-first)/first)
 
 plt.legend()
