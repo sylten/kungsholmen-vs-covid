@@ -1,60 +1,50 @@
-from read_prices import read_prices
+from read_prices import get_street_attractiveness, read_prices
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
-p = read_prices()
+default_columns = ['price', 'fee', 'living_space', 'floor', 'street_attractiveness']
 
-columns = ['price', 'fee', 'living_space', 'supplemental_area', 'floor', 'street_attractiveness', 'latitude', 'longitude']
-df = p[columns]
-df = df[(df.price < 12000000) & (df.living_space < 120)] # There are very few values for the largest and most expensive apartments
+def create_model(df, columns = default_columns):
+    df = df[columns]
+    df = df[(df.price < 12000000) & (df.living_space < 120)] # There are very few values for the largest and most expensive apartments
 
-df = df.apply(lambda col: col.fillna(col.mean()), axis=0) # There is 1 missing fee value, fill it with the mean
+    df = df.apply(lambda col: col.fillna(col.mean()), axis=0) # There is 1 missing fee value, fill it with the mean
 
-# category_columns = ['location_part']
+    X = df.drop('price', axis=1)
+    y = df['price']
 
-# for column in category_columns:
-#     df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column, prefix_sep='_')], axis=1)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3)
 
-X = df.drop('price', axis=1)
-y = df['price']
+    model = LinearRegression().fit(X_train, y_train)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3)
+    return model, X_train, X_test, y_train, y_test
 
-model = LinearRegression().fit(X_train, y_train)
+def plot_regression(df, columns = default_columns):
+    model, X_train, X_test, y_train, y_test = create_model(df, columns)
 
-y_pred = model.predict(X_test)
-score = r2_score(y_test, y_pred)
+    y_pred = model.predict(X_test)
 
-print("Coefficients:", list(zip(columns[1:], [round(coefficient, 2) for coefficient in model.coef_])))
+    # print("Coefficients:", list(zip(columns[1:], [round(coefficient, 2) for coefficient in model.coef_])))
+    print("R2-Score:", r2_score(y_test, y_pred))
 
-print("R2-Score:", score)
+    plt.scatter(X_train.living_space, y_train, s=2)
+    plt.scatter(X_test.living_space, y_pred, label="Predictions", color="r", s=2)
 
-def predict(fee, square_meters, supplemental_area, floor, attractiveness, latitude, longitude):
-    predicton = model.predict([[fee, square_meters, supplemental_area, floor, attractiveness, latitude, longitude]])
-    return (int(predicton), int(predicton/square_meters))
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
 
-def get_street_attractiveness(street_id):
-    return p[p.street_id == street_id].street_attractiveness.iloc[0]
+    plt.xlabel('Size (m²)')
+    plt.ylabel('Price (SEK)')
 
-# trying on a few recent prices not included in the data :)
-print("Pipersgatan 18", predict(3062, 37.5, 0, 3, get_street_attractiveness('pipersgatan'), 59.33077979355131, 18.04613709033011))
-print("John Bergs plan 3", predict(2331, 36, 0, 1, get_street_attractiveness('johnbergsplan'), 59.33660760344284, 18.02240339102813))
-print("Pontonjärgatan 21", predict(1386, 37, 0, 2, get_street_attractiveness('pontonjrgatan'), 59.3287096941292, 18.03357154798916))
-print("Kungsholmsgatan 11", predict(3355, 42, 0, 5, get_street_attractiveness('kungsholmsgatan'), 59.330794867459694, 18.04856538283224))
+    plt.legend()
+    plt.show()
 
-plt.scatter(X.living_space, y, s=2)
-plt.scatter(X_test.living_space, y_pred, label="Predictions", color="r", s=2)
-
-ax = plt.gca()
-ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-
-plt.xlabel('Size (m²)')
-plt.ylabel('Price (SEK)')
-
-plt.legend()
-plt.show()
+def predict(df, fee, square_meters, floor, street_id):
+    model, X_train, X_test, y_train, y_test = create_model(df)
+    predicton = model.predict([[fee, square_meters, floor, get_street_attractiveness(df, street_id)]])
+    return int(predicton)

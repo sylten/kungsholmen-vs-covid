@@ -1,19 +1,13 @@
-from read_prices import read_prices
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-df = read_prices()
+def price_scatter_plot(apartments_df, xaxis, yaxis, xlabel=False, ylabel=False):
+    df = apartments_df[[xaxis, yaxis]].dropna()
 
-df = df[(df.price < 12000000) & (df.living_space < 120)]
+    ax = df.plot.scatter(x=xaxis, y=yaxis, s=2, xlabel=xlabel or xaxis, ylabel=ylabel or yaxis)
 
-xaxis = 'living_space'
-yaxis = 'price'
-df = df[[xaxis, yaxis]].dropna()
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
 
-ax = df.plot.scatter(x=xaxis, y=yaxis, s=2)
-
-ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-
-plt.show()
+    plt.show()

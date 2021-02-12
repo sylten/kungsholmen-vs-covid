@@ -1,28 +1,29 @@
-from read_prices import read_prices
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-apartments = read_prices()
-
-apartments['datetime'] = pd.to_datetime(apartments['sale_date'])
-
-fig, ax = plt.subplots(figsize=(8,4))
-ax.set_ylabel("Price / m² (SEK)")
-ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-
-for bounds in [(0, 25), (26, 50), (51, 150)]:
-    df = apartments[(apartments['living_space'] >= bounds[0]) & (apartments['living_space'] <= bounds[1])]
-
-    df = df.groupby(pd.Grouper(key='datetime', freq='Q')).price_per_area.mean()
-    df.plot(x='datetime', y='price_per_area', ax=ax, label=f"{bounds[0]}-{bounds[1]} m²")
-
-    first = df.iloc[0]
-    last = df.iloc[len(df)-1]
+def plot_price_timeline_for_apartment_sizes(apartments_df):
+    fig, ax = plt.subplots(figsize=(8,4))
+    ax.set_ylabel("Price / m² (SEK)")
+    ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
     
-    print(bounds, int(first), int(last), (last-first)/first)
+    # Most of the apartments sold during the last 12 months were 1 or 2 room apartments
+    # So splitting the larger apartments into more groups would not be reliable at all because of too few data points
+    # Group apartments into 3 size categories and plot a line per group
+    for bounds in [(0, 25), (26, 50), (51, 150)]:
+        bounds_df = apartments_df[(apartments_df['living_space'] >= bounds[0]) & (apartments_df['living_space'] <= bounds[1])]
 
-plt.legend()
-plt.show()
+        # Group mean price by quarter
+        bounds_df = bounds_df.groupby(pd.Grouper(key='sale_datetime', freq='Q')).price_per_area.mean()
+
+        bounds_df.plot(x='sale_datetime', y='price_per_area', ax=ax, label=f"{bounds[0]}-{bounds[1]} m²")
+
+        price_first_quarter = bounds_df.iloc[0]
+        price_last_quarter = bounds_df.iloc[len(bounds_df)-1]
+        
+        print(bounds[0], "to", bounds[1], "m² -", "Price Q1 2020:", int(price_first_quarter), "SEK/m², Price Q1 2021:", int(price_last_quarter), "SEK/m², Change:", int(((price_last_quarter-price_first_quarter)/price_first_quarter)*100), "%")
+
+    plt.legend()
+    plt.show()

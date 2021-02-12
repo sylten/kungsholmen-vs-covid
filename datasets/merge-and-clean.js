@@ -1,10 +1,8 @@
 const fs = require('fs')
 const json2csv = require('json-2-csv').json2csv;
 
-/**
- * I used javascript for this. I have a web development background and still feel more comfortable in JS.
- * I probably should practice my Python but I wanted to clean up the data and get started quickly :)
- */
+const hemnetDataDir = './hemnet-data';
+const outputFile = './apartment-prices.csv';
 
 function getFloor(adress) {
     for (let pattern of [/,(.*) tr/, /, (.*)tr/, /,(.*)tr/, /, våning (.*)/, /, vån (.*)/,/ vån (.*)./]) {
@@ -16,17 +14,15 @@ function getFloor(adress) {
     return '0';
 }
 
-const all = {};
+const allApartments = {};
 
 for (let i = 1; i <= 25; i++) {
-    data = require(`./data${i}.json`);
+    data = require(`${hemnetDataDir}/data${i}.json`);
     for (let p of data.properties) {
         p.price_per_area = p.price_per_area?.replace(/\D/g,'') || '';
         p.asked_price = p.asked_price?.replace(/\D/g,'') || '';
         p.price = p.formatted_price?.replace(/\D/g,'') || '';
         p.price_change = !p.formatted_price_change_percentage ? 0 : parseInt(p.formatted_price_change_percentage.replace(/[\+\%\s]/g,''));
-        p.is_attractive = p.price_change > 20 ? 1 : 0;
-        p.is_unattractive = p.price_change < 0 ? 1 : 0;
         p.living_space = (p.living_space?.substr(0, p.living_space.indexOf(' ')).replace(',', '.') || '').trim();
         p.supplemental_area = p.supplemental_area?.substr(0, p.supplemental_area.indexOf(' ')).replace(',', '.') || 0;
         p.rooms = p.rooms?.substr(0, p.rooms.indexOf(' ')).replace(',', '.') || '';
@@ -37,29 +33,30 @@ for (let i = 1; i <= 25; i++) {
         p.sale_date = p.sale_date?.substr(5) || '';
         p.latitude = p.coordinate[0];
         p.longitude = p.coordinate[1];
-        all[p.id] = p;
 
         if (p.floor.match(/[^\d]/g)) {
             console.log(`floor '${p.floor}' contains non-numeric characters`)
         }
         else if (parseInt(p.floor) > 15) {
-            console.log(`floor ${p.floor} seems to high for Kungsholmen (${p.id})`)
+            console.log(`floor ${p.floor} seems too high for Kungsholmen (${p.id})`)
         }
 
         if (p.rooms.indexOf('.') > -1) {
             p.rooms = p.rooms.substr(0, p.rooms.indexOf('.'));
         }
+
+        allApartments[p.id] = p;
     }
 }
 
-const arr = Object.keys(all).map(key => all[key]);
+const apartments = Object.keys(allApartments).map(key => allApartments[key]);
 
-console.log(`found ${arr.length} unique prices`)
+console.log(`found ${apartments.length} unique prices`)
 
-json2csv(arr, (err, csv) => {
+json2csv(apartments, (err, csv) => {
     if (err) {
         throw err;
     }
 
-    fs.writeFileSync('./apartment-prices.csv', csv);
+    fs.writeFileSync(outputFile, csv);
 });
