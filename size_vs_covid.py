@@ -28,4 +28,3 @@ def plot_price_timeline_for_apartment_sizes(apartments_df):
 
     plt.legend()
     plt.show()
-plot_price_timeline_for_apartment_sizes(read_and_clean_apartment_data())
