@@ -1,4 +1,3 @@
-from read_data import read_and_clean_apartment_data
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
