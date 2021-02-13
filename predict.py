@@ -1,17 +1,17 @@
-from read_prices import get_street_attractiveness, read_prices
+from read_data import get_street_attractiveness, get_street_id
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
-default_columns = ['price', 'fee', 'living_space', 'floor', 'street_attractiveness']
+default_columns = ['price', 'fee', 'living_space', 'street_attractiveness']
 
 def create_model(df, columns = default_columns):
     df = df[columns]
-    df = df[(df.price < 12000000) & (df.living_space < 120)] # There are very few values for the largest and most expensive apartments
 
-    df = df.apply(lambda col: col.fillna(col.mean()), axis=0) # There is 1 missing fee value, fill it with the mean
+    # There is 1 missing fee value, fill it with the mean
+    df = df.apply(lambda col: col.fillna(col.mean()), axis=0)
 
     X = df.drop('price', axis=1)
     y = df['price']
@@ -44,7 +44,7 @@ def plot_regression(df, columns = default_columns):
     plt.legend()
     plt.show()
 
-def predict(df, fee, square_meters, floor, street_id):
+def predict(df, address, square_meters, fee):
     model, X_train, X_test, y_train, y_test = create_model(df)
-    predicton = model.predict([[fee, square_meters, floor, get_street_attractiveness(df, street_id)]])
+    predicton = model.predict([[fee, square_meters, get_street_attractiveness(df, get_street_id(address))]])
     return int(predicton)

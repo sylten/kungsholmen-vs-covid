@@ -1,3 +1,4 @@
+from read_data import read_and_clean_apartment_data
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -23,7 +24,8 @@ def plot_price_timeline_for_apartment_sizes(apartments_df):
         price_first_quarter = bounds_df.iloc[0]
         price_last_quarter = bounds_df.iloc[len(bounds_df)-1]
         
-        print(bounds[0], "to", bounds[1], "m² -", "Price Q1 2020:", int(price_first_quarter), "SEK/m², Price Q1 2021:", int(price_last_quarter), "SEK/m², Change:", int(((price_last_quarter-price_first_quarter)/price_first_quarter)*100), "%")
+        print(bounds[0], "to", bounds[1], "m² -", "Price Q1 2020:", int(price_first_quarter), "SEK/m², Price Q1 2021:", int(price_last_quarter), "SEK/m², Change:", round(((price_last_quarter-price_first_quarter)/price_first_quarter)*100, 1), "%")
 
     plt.legend()
     plt.show()
+plot_price_timeline_for_apartment_sizes(read_and_clean_apartment_data())

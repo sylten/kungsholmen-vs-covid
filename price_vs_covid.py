@@ -1,19 +1,6 @@
-from datetime import datetime
+from read_data import read_covid_data
 import pandas as pd
 import matplotlib.pyplot as plt
-
-def read_covid_data():
-    covid_df = pd.read_csv(f'./datasets/owid-covid-data.csv')
-    covid_df['datetime'] = pd.to_datetime(covid_df['date'])
-
-    # remove other countries than sweden
-    covid_df = covid_df[covid_df.location.isin(['Sweden'])]
-
-    # there's some weirdness going on in the beginning of the pandemic, total deaths decreases a few times
-    # there's prety much no deaths yet before March 10, 2020 anyway so lets just remove it
-    covid_df = covid_df[covid_df.datetime > datetime(2020,3,10)]
-    
-    return covid_df
 
 def plot_apartment_price_vs_covid_deaths(apartments_df):
     covid_df = read_covid_data()

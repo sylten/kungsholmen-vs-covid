@@ -1,8 +1,0 @@
-{
-    "name": "merge-and-clean",
-    "description": "merges and cleans hemnet json data and outputs apartment-prices.csv",
-    "version": "0.1.0",
-    "dependencies": {
-        "json-2-csv": "^3.10.2"
-    }
-}
