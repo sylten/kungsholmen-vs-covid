@@ -1,5 +1,5 @@
 # kungsholmen-vs-covid
-Analysis of apartment prices on Kungsholmen in Stockholm, Sweden.
+Analysis of apartment prices on Kungsholmen in Stockholm, Sweden during the year of covid-19, 2020.
 
 ## Dependencies
 - Python 3
