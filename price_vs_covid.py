@@ -3,6 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def plot_apartment_price_vs_covid_deaths(apartments_df):
+    """
+    Description: Plot's apartment prices and total covid death count as line plots. 
+
+    Arguments:
+        apartments_df (DataFrame): dataframe containg apartment price data. 
+
+    Returns:
+        None
+    """
+
     covid_df = read_covid_data()
 
     fig, ax = plt.subplots(figsize=(8,4))

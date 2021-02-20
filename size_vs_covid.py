@@ -3,6 +3,16 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 def plot_price_timeline_for_apartment_sizes(apartments_df):
+    """
+    Description: Shows price development by quarter for different apartment sizes. Size groups: 0-25m², 26-50m² and 51-150m².
+
+    Arguments:
+        apartments_df (DataFrame): dataframe containg apartment price data.
+
+    Returns:
+        None
+    """
+
     fig, ax = plt.subplots(figsize=(8,4))
     ax.set_ylabel("Price / m² (SEK)")
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))

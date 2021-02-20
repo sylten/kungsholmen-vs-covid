@@ -4,19 +4,58 @@ import re
 from sklearn.preprocessing import MinMaxScaler
 
 def extract_number(text):
+    """
+    Description: Removes all non-numeric characters and returns all numbers found as a floating point number. Converts , decimal separator to .
+
+    Arguments:
+        text (string): Text to extract number from.
+
+    Returns:
+        float: Extracted number with . as decimal point.
+    """
     if text != text:
         return None
     
     return float(re.sub(r"[^0-9,]", "", text).replace(',','.'))
 
 def get_street_id(address):
+    """
+    Description: Removes street number and any additional information from address and returns a unique identifier for streets.
+
+    Arguments:
+        address (string): A street address to create id for.
+
+    Returns:
+        string: Street identifier.
+    """
+
     first_number = re.search(r"\d", address)
     return re.sub(r"[^A-z]", "", address[:(first_number.start() if first_number != None else len(address))]).lower()
 
 def get_street_attractiveness(df, street_id):
+    """
+    Description: Finds street attractiveness for a street id.
+
+    Arguments:
+        df (DataFrame): dataframe containg apartment price data, including street attractiveness. 
+        street_id (string): Street id to look for
+
+    Returns:
+        float: Street attractiveness.
+    """
+
     return df[df.street_id == street_id].street_attractiveness.iloc[0]
 
 def read_and_clean_apartment_data():
+    """
+    Description: Read's apartment data from a csv file containing apartment data from Hemnet. 
+    Skips data rows with no specified size or size > 120 square meters and sale price over 12 million SEK.
+    Adds columns fee_per_area= Fee divided by square meters, street_id= Unique street id, street_attractiveness: estimated attractiveness of the apartment's street.
+
+    Returns:
+        DataFrame: DataFrame containing cleaned apartment data.
+    """
+
     df = pd.read_csv('./datasets/hemnet-data.csv')
     
     # One listing has a missing size, let's just drop it since it's only 1
@@ -57,6 +96,13 @@ def read_and_clean_apartment_data():
     return df
 
 def read_covid_data():
+    """
+    Description: Read's Swedish covid data per date from Our World in Data.
+
+    Returns:
+        DataFrame: Dataframe containing swedish covid data after 2020-03-10.
+    """
+
     covid_df = pd.read_csv(f'./datasets/owid-covid-data.csv')
     covid_df['datetime'] = pd.to_datetime(covid_df['date'])
 
