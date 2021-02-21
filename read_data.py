@@ -71,7 +71,7 @@ def clean_outliers(df):
 
 def read_and_clean_apartment_data(remove_outliers = True):
     """
-    Description: Read's apartment data from a csv file containing apartment data from Hemnet. 
+    Description: Reads apartment data from a csv file containing apartment data from Hemnet. 
     Skips data rows with no specified size or size > 120 square meters or sale price over 12 million SEK.
     Adds columns fee_per_area= Fee divided by square meters, street_id= Unique street id, street_attractiveness: estimated attractiveness of the apartment's street.
 
@@ -115,7 +115,7 @@ def read_and_clean_apartment_data(remove_outliers = True):
 
 def read_covid_data():
     """
-    Description: Read's Swedish covid data per date from Our World in Data.
+    Description: Reads Swedish covid data per date from Our World in Data.
 
     Returns:
         DataFrame: Dataframe containing swedish covid data after 2020-03-10.
