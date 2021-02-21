@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 def plot_apartment_price_vs_covid_deaths(apartments_df):
     """
-    Description: Plot's apartment prices and total covid death count as line plots. 
+    Description: Plots apartment prices and total covid death count as line plots. 
 
     Arguments:
         apartments_df (DataFrame): dataframe containg apartment price data. 

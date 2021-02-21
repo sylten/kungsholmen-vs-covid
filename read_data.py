@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 import pandas as pd
 import re
 from sklearn.preprocessing import MinMaxScaler
@@ -46,32 +47,53 @@ def get_street_attractiveness(df, street_id):
 
     return df[df.street_id == street_id].street_attractiveness.iloc[0]
 
-def read_and_clean_apartment_data():
+def clean_outliers(df):
+    """
+    Description: Remove apartments over a certain price point, or under or over a certain sizes.
+
+    Arguments:
+        df (DataFrame): dataframe containg apartment price data.
+
+    Returns:
+        DataFrame: Cleaned apartment data.
+    """
+
+    # Remove extreme prices per area
+    df = df[(df.price_per_area > 60000) & (df.price_per_area < 120000)]
+
+    # Remove extreme final prices
+    df = df[(df.price <= 12000000)]
+
+    # Remove extremely small and very large apartments
+    df = df[(df.living_space >= 15) & (df.living_space <= 120)]
+
+    return df
+
+def read_and_clean_apartment_data(remove_outliers = True):
     """
     Description: Read's apartment data from a csv file containing apartment data from Hemnet. 
-    Skips data rows with no specified size or size > 120 square meters and sale price over 12 million SEK.
+    Skips data rows with no specified size or size > 120 square meters or sale price over 12 million SEK.
     Adds columns fee_per_area= Fee divided by square meters, street_id= Unique street id, street_attractiveness: estimated attractiveness of the apartment's street.
+
+    Arguments:
+        remove_outliers (boolean): Whether or not to remove identified outliers.
 
     Returns:
         DataFrame: DataFrame containing cleaned apartment data.
     """
 
     df = pd.read_csv('./datasets/hemnet-data.csv')
-    
-    # One listing has a missing size, let's just drop it since it's only 1
-    df = df[df.living_space.notnull()]
 
     # Prices are formatted to be displayed on a website so we need to remove non-digits
     df.price_per_area = df.price_per_area.apply(extract_number)
     df.asked_price = df.asked_price.apply(extract_number)
     df.price = df.price.apply(extract_number)
     df.fee = df.fee.apply(extract_number)
-    
 
     # Sizes are in square meters and also need some cleaning
     df.living_space = df.living_space.apply(extract_number)
     df.supplemental_area = df.supplemental_area.apply(extract_number)
-    df.rooms = df.rooms.apply(extract_number)
+    df.rooms = df.rooms.apply(extract_number).apply(lambda r: math.floor(r))
     df['fee_per_area'] = df.fee / df.living_space
 
     df['street_id'] = df.address.apply(get_street_id)
@@ -80,12 +102,8 @@ def read_and_clean_apartment_data():
     # The sale date is also formatted so the first 5 chars are always "Såld " ("Sold " in Swedish)
     df['sale_datetime'] = pd.to_datetime(df.sale_date.str[5:])
 
-    # There's a few outliers among the largest and most expensive apartments, so exclude them
-    df = df[(df.price < 12000000) & (df.living_space < 120)]
-
-    # There's an interesting outlying price of around 130 000 SEK/m² on a street with an attractiveness of less than .2, remove it
-    # I moved it up here so it wouldnät influence the attractiveness calculation
-    df = df[df.id != 1229419]
+    if remove_outliers:
+        df = clean_outliers(df)
 
     # Get each street's mean price per square meter
     street_mean = df.groupby('street_id').price_per_area.transform('mean')

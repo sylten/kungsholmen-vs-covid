@@ -1,13 +1,15 @@
-from read_data import get_street_attractiveness, get_street_id
+from read_data import get_street_attractiveness, get_street_id, read_and_clean_apartment_data
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
 
 default_columns = ['price', 'fee', 'living_space', 'street_attractiveness']
+default_y = default_columns[0]
 
-def create_model(df, columns = default_columns, y_column='price'):
+def create_model(df, columns = default_columns, y_column=default_y):
     """
     Description: Creates a linear regression model from a dataframe containing apartment price data.
 
@@ -26,21 +28,18 @@ def create_model(df, columns = default_columns, y_column='price'):
 
     df = df[columns]
 
-    # There is 1 missing fee value, fill it with the mean
-    df = df.apply(lambda col: col.fillna(col.mean()), axis=0)
-
     X = df.drop(y_column, axis=1)
     y = df[y_column]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=42)
 
     model = LinearRegression().fit(X_train, y_train)
 
     return model, X_train, X_test, y_train, y_test
 
-def plot_regression(df, columns = default_columns, y_column='price'):
+def evaluate_model(df, columns = default_columns, y_column=default_y): 
     """
-    Description: Creates a linear regression model to predict apartment prices, and plots training and testing data as a scatter plot.
+    Description: Creates a linear regression model to predict apartment prices, and evaluates the model using R squared and mean squared error.
 
     Arguments:
         df (DataFrame): dataframe containg apartment price data. 
@@ -48,18 +47,36 @@ def plot_regression(df, columns = default_columns, y_column='price'):
         y_column (list): column to predict. Default='price'
 
     Returns:
-        None
+        float: R2-score
+        float: Mean squared error
+    """
+    model, X_train, X_test, y_train, y_test = create_model(df, columns, y_column)
+
+    y_pred = model.predict(X_test)
+
+    return r2_score(y_test, y_pred), mean_squared_error(y_test, y_pred, squared=False)
+
+def plot_regression(df, columns = default_columns, y_column=default_y):
+    """
+    Description: Creates a linear regression model to predict apartment prices, and plots training data and predicted testing data as a scatter plot.
+
+    Arguments:
+        df (DataFrame): dataframe containg apartment price data. 
+        columns (list): column names to use for the regression. Default=['price', 'fee', 'living_space', 'street_attractiveness']
+        y_column (list): column to predict. Default='price'
+
+    Returns:
+        float: R2-score
+        float: Mean squared error
     """
 
     model, X_train, X_test, y_train, y_test = create_model(df, columns, y_column)
 
     y_pred = model.predict(X_test)
 
-    # print("Coefficients:", list(zip(columns[1:], [round(coefficient, 2) for coefficient in model.coef_])))
-    print("R2-Score:", r2_score(y_test, y_pred))
-
-    plt.scatter(X_train.living_space, y_train, s=2)
-    plt.scatter(X_test.living_space, y_pred, label="Predictions", color="r", s=2)
+    xaxis = 'living_space'
+    plt.scatter(X_train[xaxis], y_train, s=2)
+    plt.scatter(X_test[xaxis], y_pred, label="Predictions", color="r", s=2)
 
     ax = plt.gca()
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))

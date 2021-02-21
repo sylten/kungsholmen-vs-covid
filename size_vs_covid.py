@@ -4,7 +4,7 @@ import matplotlib as mpl
 
 def plot_price_timeline_for_apartment_sizes(apartments_df):
     """
-    Description: Shows price development by quarter for different apartment sizes. Size groups: 0-25m², 26-50m² and 51-150m².
+    Description: Shows price development by quarter for different apartment sizes. Size groups: 0-25m², 26-50m² and 51-120m².
 
     Arguments:
         apartments_df (DataFrame): dataframe containg apartment price data.
@@ -22,7 +22,7 @@ def plot_price_timeline_for_apartment_sizes(apartments_df):
     # Most of the apartments sold during the last 12 months were 1 or 2 room apartments
     # So splitting the larger apartments into more groups would not be reliable at all because of too few data points
     # Group apartments into 3 size categories and plot a line per group
-    for bounds in [(0, 25), (26, 50), (51, 150)]:
+    for bounds in [(0, 25), (26, 50), (51, 120)]:
         bounds_df = apartments_df[(apartments_df['living_space'] >= bounds[0]) & (apartments_df['living_space'] <= bounds[1])]
 
         # Group mean price by quarter
