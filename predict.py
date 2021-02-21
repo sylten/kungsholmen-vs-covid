@@ -89,6 +89,8 @@ def plot_regression(df, columns = default_columns, y_column=default_y):
     plt.legend()
     plt.show()
 
+    # return r2_score(y_test, y_pred), mean_squared_error(y_test, y_pred, squared=False)
+
 def predict(df, address, square_meters, fee):
     """
     Description: Estimates an apartment's sale price.
@@ -106,3 +108,6 @@ def predict(df, address, square_meters, fee):
     model, X_train, X_test, y_train, y_test = create_model(df)
     predicted_price = model.predict([[fee, square_meters, get_street_attractiveness(df, get_street_id(address))]])
     return int(predicted_price)
+
+# df = read_and_clean_apartment_data()
+# print(plot_regression(df))
